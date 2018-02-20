@@ -166,9 +166,9 @@ void rastBBox_bbox_fix( u_Poly< long , ushort >& poly ,
   ll_x = ur_x = v[0].x[0];
   ll_y = ur_y = v[0].x[1];
 
-  #define MIN(_a, _b) (_a) < (_b) ? (_a) : (_b)
-  #define MAX(_a, _b) (_a) > (_b) ? (_a) : (_b)
-  for(int i=0; i < 4; ++i){
+  #define MIN(_a, _b) ((_a) < (_b) ? (_a) : (_b))
+  #define MAX(_a, _b) ((_a) > (_b) ? (_a) : (_b))
+  for(int i=0; i < poly.vertices; ++i){
     ur_x = MAX(v[i].x[0], ur_x);
     ll_x = MIN(v[i].x[0], ll_x);
     ur_y = MAX(v[i].x[1], ur_y);
@@ -176,7 +176,12 @@ void rastBBox_bbox_fix( u_Poly< long , ushort >& poly ,
   }
 
   valid = !( ur_x < 0 || ur_y < 0 || ll_x > screen_w || ll_y > screen_h);
-  
+
+  ll_x = MAX(ll_x, 0);
+  ll_y = MAX(ll_y, 0);
+  ur_x = MIN(ur_x, screen_w);
+  ur_y = MIN(ur_y, screen_h);
+
 //  ur_x >>= r_shift;
 //  ur_y >>= r_shift;
 //  ll_x >>= r_shift;
