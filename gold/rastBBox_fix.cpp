@@ -177,10 +177,14 @@ void rastBBox_bbox_fix( u_Poly< long , ushort >& poly ,
 
   valid = !( ur_x < 0 || ur_y < 0 || ll_x > screen_w || ll_y > screen_h);
 
-  ll_x = MAX(ll_x, 0);
-  ll_y = MAX(ll_y, 0);
-  ur_x = MIN(ur_x, screen_w);
-  ur_y = MIN(ur_y, screen_h);
+#define FLOOR_SS(val) ((val >> ( r_shift - ss_w_lg2 )) << ( r_shift - ss_w_lg2 ))
+  ll_x = FLOOR_SS(MAX(ll_x, 0));
+  ll_y = FLOOR_SS(MAX(ll_y, 0));
+  ur_x = FLOOR_SS(MIN(ur_x, screen_w));
+  ur_y = FLOOR_SS(MIN(ur_y, screen_h));
+
+
+
 
 //  ur_x >>= r_shift;
 //  ur_y >>= r_shift;
@@ -247,9 +251,9 @@ int rastBBox_stest_fix( u_Poly< long , ushort >& poly,
   long v2_y = poly.v[2].x[1] - s_y;
  
 
-  result = ( (v0_x*v1_y - v1_x*v0_y <= 0) &&
-             (v1_x*v2_y - v2_x*v1_y <  0) &&
-             (v2_x*v0_y - v0_x*v2_y <= 0)
+  result = ( ((v0_x*v1_y - v1_x*v0_y) <= 0) &&
+             ((v1_x*v2_y - v2_x*v1_y) <  0) &&
+             ((v2_x*v0_y - v0_x*v2_y) <= 0)
            );
 
     
