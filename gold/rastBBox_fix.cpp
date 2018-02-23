@@ -236,17 +236,23 @@ int rastBBox_stest_fix( u_Poly< long , ushort >& poly,
 
   ///// PLACE YOUR CODE HERE
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+// Vertex 0's x,y coords
+  long v0_x = poly.v[0].x[0] - s_x;
+  long v0_y = poly.v[0].x[1] - s_y;
+// Vertex 1's x,y coords
+  long v1_x = poly.v[1].x[0] - s_x;
+  long v1_y = poly.v[1].x[1] - s_y;
+// Vertex 2's x,y coords
+  long v2_x = poly.v[2].x[0] - s_x;
+  long v2_y = poly.v[2].x[1] - s_y;
+ 
+
+  result = ( (v0_x*v1_y - v1_x*v0_y <= 0) &&
+             (v1_x*v2_y - v2_x*v1_y <  0) &&
+             (v2_x*v0_y - v0_x*v2_y <= 0)
+           );
+
+    
 
   /////
   ///// Sample Test Function Goes Here
