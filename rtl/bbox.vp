@@ -266,14 +266,20 @@ module `mname()`
    //       as a bitwise and operation.
 
    
+   logic[`$radix`-1:0] mask;
    //Round LowerLeft and UpperRight for X and Y
    //; for( my $i = 0 ; $i < 2 ; $i++ ) {
    //; 	for( my $j = 0 ; $j < 2 ; $j++ ) {
    always_comb begin
       
+      mask = ~((1<<(`$radix`-subSample_RnnnnU)) -1)
       //Integer Portion of LL and UR Remains the Same 
       rounded_box_R10S[`$i`][`$j`][`$sig_fig`-1:`$radix`] 
      = box_R10S[`$i`][`$j`][`$sig_fig`-1:`$radix`];
+
+      rounded_box_R10S[`$i`][`$j`][`$radix`-1:0] = 
+     = box_R10S[`$i`][`$j`][`$radix`-1:0] & mask;
+      
 
       //////// PLACE YOUR CODE HERE
       //////// ASSIGN FRACTION PORTION
