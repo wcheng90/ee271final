@@ -52,29 +52,72 @@ int rastBBox_bbox_check( int   v0_x,     //uPoly
   //Copy Past C++ Bounding Box Function ****BEGIN****
   //
   // note that bool,true, and false are not in c
-  ll_x = ur_x = poly.v[0].x[0];
-  ll_y = ur_y = poly.v[0].x[1];
 
-  #define MIN(_a, _b) ((_a) < (_b) ? (_a) : (_b))
-  #define MAX(_a, _b) ((_a) > (_b) ? (_a) : (_b))
-  int i;
-  for(i=0; i < poly.q; ++i){
-    ur_x = MAX(poly.v[i].x[0], ur_x);
-    ll_x = MIN(poly.v[i].x[0], ll_x);
-    ur_y = MAX(poly.v[i].x[1], ur_y);
-    ll_y = MIN(poly.v[i].x[1], ll_y);
-  }
+  int b_x[6] ;
+  int b_y[6] ;
 
-  valid = !( ur_x < 0 || ur_y < 0 || ll_x > screen_w || ll_y > screen_h);
+  //Calculate BBox
+  b_x[0] = poly.v[0].x[0] < poly.v[1].x[0];
+  b_x[1] = poly.v[0].x[0] < poly.v[2].x[0];
+  b_x[2] = poly.v[0].x[0] < poly.v[3].x[0];
+  b_x[3] = poly.v[1].x[0] < poly.v[2].x[0];
+  b_x[4] = poly.v[1].x[0] < poly.v[3].x[0];
+  b_x[5] = poly.v[2].x[0] < poly.v[3].x[0];
+ 
+  b_y[0] = poly.v[0].x[1] < poly.v[1].x[1];
+  b_y[1] = poly.v[0].x[1] < poly.v[2].x[1];
+  b_y[2] = poly.v[0].x[1] < poly.v[3].x[1];
+  b_y[3] = poly.v[1].x[1] < poly.v[2].x[1];
+  b_y[4] = poly.v[1].x[1] < poly.v[3].x[1];
+  b_y[5] = poly.v[2].x[1] < poly.v[3].x[1];
 
-  #define FLOOR_SS(val) ((val >> ( r_shift - ss_w_lg2 )) << ( r_shift - ss_w_lg2 ))
-  ll_x = FLOOR_SS(MAX(ll_x, 0));
-  ll_y = FLOOR_SS(MAX(ll_y, 0));
-  ur_x = FLOOR_SS(MIN(ur_x, screen_w));
-  ur_y = FLOOR_SS(MIN(ur_y, screen_h));
+  ur_x = 0 ;
+  ur_y = 0 ;
+  ll_x = 0 ;
+  ll_y = 0 ;
+ 
+  ur_x = ( !b_x[0] && !b_x[1] )                 ? poly.v[0].x[0] :  ur_x ;
+  ur_x = (  b_x[0] && !b_x[3] )                 ? poly.v[1].x[0] :  ur_x ;
+  ur_x = (  b_x[1] &&  b_x[3] )                 ? poly.v[2].x[0] :  ur_x ;
+  ur_x = (  b_x[2] &&  b_x[4] &&  b_x[5] && q ) ? poly.v[3].x[0] :  ur_x ;
+
+  ll_x = (  b_x[0] &&  b_x[1] )                 ? poly.v[0].x[0] :  ll_x ;
+  ll_x = ( !b_x[0] &&  b_x[3] )                 ? poly.v[1].x[0] :  ll_x ;
+  ll_x = ( !b_x[1] && !b_x[3] )                 ? poly.v[2].x[0] :  ll_x ;
+  ll_x = ( !b_x[2] && !b_x[4] && !b_x[5] && q ) ? poly.v[3].x[0] :  ll_x ;
+
+  ur_y = ( !b_y[0] && !b_y[1] )                 ? poly.v[0].x[1] :  ur_y ;
+  ur_y = (  b_y[0] && !b_y[3] )                 ? poly.v[1].x[1] :  ur_y ;
+  ur_y = (  b_y[1] &&  b_y[3] )                 ? poly.v[2].x[1] :  ur_y ;
+  ur_y = (  b_y[2] &&  b_y[4] &&  b_y[5] && q ) ? poly.v[3].x[1] :  ur_y ;
+
+  ll_y = (  b_y[0] &&  b_y[1] )                 ? poly.v[0].x[1] :  ll_y ;
+  ll_y = ( !b_y[0] &&  b_y[3] )                 ? poly.v[1].x[1] :  ll_y ;
+  ll_y = ( !b_y[1] && !b_y[3] )                 ? poly.v[2].x[1] :  ll_y ;
+  ll_y = ( !b_y[2] && !b_y[4] && !b_y[5] && q ) ? poly.v[3].x[1] :  ll_y ;
+
+  valid = (! ((ll_x > screen_w) || (ll_y > screen_h) || (ur_x < 0) || (ur_y < 0)) ) && valid_Poly; 
 
 
+  //Clamp BBox
+  ur_x = ( ur_x >> ( r_shift - ss_w_lg2 )) << ( r_shift - ss_w_lg2 ) ;
+  ur_y = ( ur_y >> ( r_shift - ss_w_lg2 )) << ( r_shift - ss_w_lg2 ) ;
+  ll_x = ( ll_x >> ( r_shift - ss_w_lg2 )) << ( r_shift - ss_w_lg2 ) ;
+  ll_y = ( ll_y >> ( r_shift - ss_w_lg2 )) << ( r_shift - ss_w_lg2 ) ;
 
+  ur_x = ur_x > screen_w ? screen_w : ur_x ;
+  ur_y = ur_y > screen_h ? screen_h : ur_y ;
+
+  ll_x = ll_x < 0   ? 0   : ll_x ;
+  ll_y = ll_y < 0   ? 0   : ll_y ;
+
+  /*
+  valid = 1 ;
+  valid = ur_x < 0 ? 0 : valid ;
+  valid = ur_y < 0 ? 0 : valid ;
+  valid = ll_x > screen_w ? 0 : valid ;
+  valid = ll_y > screen_h ? 0 : valid ;
+  */
 			  
 
   //
@@ -163,25 +206,50 @@ int rastBBox_stest_check( int   v0_x,      //uPoly
   //
   // note that bool,true, and false are not in c
 
-  int result = 0;
-// Vertex 0's x,y coords
-  v0_x = poly.v[0].x[0] - s_x;
-  v0_y = poly.v[0].x[1] - s_y;
-// Vertex 1's x,y coords
-  v1_x = poly.v[1].x[0] - s_x;
-  v1_y = poly.v[1].x[1] - s_y;
-// Vertex 2's x,y coords
-  v2_x = poly.v[2].x[0] - s_x;
-  v2_y = poly.v[2].x[1] - s_y;
- 
+  int dist0, dist1, dist2, dist3, dist4, dist5;
+  int  b0, b1, b2, b3, b4, b5;
+  int Tresult , Qresult , result;
 
-  result = ( ((v0_x*v1_y - v1_x*v0_y) <= 0) &&
-             ((v1_x*v2_y - v2_x*v1_y) <  0) &&
-             ((v2_x*v0_y - v0_x*v2_y) <= 0)
-           );
+  //Shift Vertices such that sample is origin
+  v0_x = poly.v[0].x[0] - s_x ;
+  v0_y = poly.v[0].x[1] - s_y ;
+  v1_x = poly.v[1].x[0] - s_x ;
+  v1_y = poly.v[1].x[1] - s_y ;
+  v2_x = poly.v[2].x[0] - s_x ;
+  v2_y = poly.v[2].x[1] - s_y ;
+  v3_x = poly.v[3].x[0] - s_x ;
+  v3_y = poly.v[3].x[1] - s_y ;
 
+  //Distance from Edge
+  dist0 = v0_x * v1_y - v1_x * v0_y;  // 0-1 edge 
+  dist1 = v1_x * v2_y - v2_x * v1_y;  // 1-2 edge 
+  dist2 = v2_x * v3_y - v3_x * v2_y;  // 2-3 edge 
+  dist3 = v3_x * v0_y - v0_x * v3_y;  // 3-0 edge 
+  dist4 = v1_x * v3_y - v3_x * v1_y;  // 2-3 edge 
+  dist5 = v2_x * v0_y - v0_x * v2_y;  // 2-0 edge
 
-  
+  //Test if on Right Side of Edge
+  b0 = dist0 <= 0.0 ;
+  b1 = dist1 <  0.0 ;
+  b2 = dist2 <  0.0 ;
+  b3 = dist3 <= 0.0 ;
+  b4 = dist4 <  0.0 ;
+  b5 = dist5 <= 0.0 ;
+
+  //Using a LUT
+  Tresult = 0;
+  Tresult |= ( b0  ? 1 : 0) << 0;
+  Tresult |= ( b1  ? 1 : 0) << 1;
+  Tresult |= ( b5  ? 1 : 0) << 2;
+
+  Qresult = 0;
+  Qresult |= ( b0 ? 1 : 0) << 0;
+  Qresult |= ( b1 ? 1 : 0) << 1;
+  Qresult |= ( b2 ? 1 : 0) << 2;
+  Qresult |= ( b3 ? 1 : 0) << 3;
+  Qresult |= ( b4 ? 1 : 0) << 4;
+
+  result =  q ? kQuadCullBackHits_fix[Qresult] : kTriCullBackHits_fix[Tresult]  ;
 
   //
   //Copy Past C++ Sample Test Function ****END****
@@ -234,28 +302,66 @@ int rastBBox_check( int   v0_x,      //uPoly
   //
   // note that bool,true, and false are not in c
 
-  ll_x = ur_x = poly.v[0].x[0];
-  ll_y = ur_y = poly.v[0].x[1];
+  int b_x[6] ;
+  int b_y[6] ;
 
-  #define MIN(_a, _b) ((_a) < (_b) ? (_a) : (_b))
-  #define MAX(_a, _b) ((_a) > (_b) ? (_a) : (_b))
-  int i;
-  for(i=0; i < poly.q; ++i){
-    ur_x = MAX(poly.v[i].x[0], ur_x);
-    ll_x = MIN(poly.v[i].x[0], ll_x);
-    ur_y = MAX(poly.v[i].x[1], ur_y);
-    ll_y = MIN(poly.v[i].x[1], ll_y);
-  }
+  //Calculate BBox
+  b_x[0] = poly.v[0].x[0] < poly.v[1].x[0];
+  b_x[1] = poly.v[0].x[0] < poly.v[2].x[0];
+  b_x[2] = poly.v[0].x[0] < poly.v[3].x[0];
+  b_x[3] = poly.v[1].x[0] < poly.v[2].x[0];
+  b_x[4] = poly.v[1].x[0] < poly.v[3].x[0];
+  b_x[5] = poly.v[2].x[0] < poly.v[3].x[0];
+ 
+  b_y[0] = poly.v[0].x[1] < poly.v[1].x[1];
+  b_y[1] = poly.v[0].x[1] < poly.v[2].x[1];
+  b_y[2] = poly.v[0].x[1] < poly.v[3].x[1];
+  b_y[3] = poly.v[1].x[1] < poly.v[2].x[1];
+  b_y[4] = poly.v[1].x[1] < poly.v[3].x[1];
+  b_y[5] = poly.v[2].x[1] < poly.v[3].x[1];
 
-  valid = !( ur_x < 0 || ur_y < 0 || ll_x > screen_w || ll_y > screen_h);
+  ur_x = 0 ;
+  ur_y = 0 ;
+  ll_x = 0 ;
+  ll_y = 0 ;
+ 
+  ur_x = ( !b_x[0] && !b_x[1] )                 ? poly.v[0].x[0] :  ur_x ;
+  ur_x = (  b_x[0] && !b_x[3] )                 ? poly.v[1].x[0] :  ur_x ;
+  ur_x = (  b_x[1] &&  b_x[3] )                 ? poly.v[2].x[0] :  ur_x ;
+  ur_x = (  b_x[2] &&  b_x[4] &&  b_x[5] && q ) ? poly.v[3].x[0] :  ur_x ;
 
-  #define FLOOR_SS(val) ((val >> ( r_shift - ss_w_lg2 )) << ( r_shift - ss_w_lg2 ))
-  ll_x = FLOOR_SS(MAX(ll_x, 0));
-  ll_y = FLOOR_SS(MAX(ll_y, 0));
-  ur_x = FLOOR_SS(MIN(ur_x, screen_w));
-  ur_y = FLOOR_SS(MIN(ur_y, screen_h));
+  ll_x = (  b_x[0] &&  b_x[1] )                 ? poly.v[0].x[0] :  ll_x ;
+  ll_x = ( !b_x[0] &&  b_x[3] )                 ? poly.v[1].x[0] :  ll_x ;
+  ll_x = ( !b_x[1] && !b_x[3] )                 ? poly.v[2].x[0] :  ll_x ;
+  ll_x = ( !b_x[2] && !b_x[4] && !b_x[5] && q ) ? poly.v[3].x[0] :  ll_x ;
 
+  ur_y = ( !b_y[0] && !b_y[1] )                 ? poly.v[0].x[1] :  ur_y ;
+  ur_y = (  b_y[0] && !b_y[3] )                 ? poly.v[1].x[1] :  ur_y ;
+  ur_y = (  b_y[1] &&  b_y[3] )                 ? poly.v[2].x[1] :  ur_y ;
+  ur_y = (  b_y[2] &&  b_y[4] &&  b_y[5] && q ) ? poly.v[3].x[1] :  ur_y ;
 
+  ll_y = (  b_y[0] &&  b_y[1] )                 ? poly.v[0].x[1] :  ll_y ;
+  ll_y = ( !b_y[0] &&  b_y[3] )                 ? poly.v[1].x[1] :  ll_y ;
+  ll_y = ( !b_y[1] && !b_y[3] )                 ? poly.v[2].x[1] :  ll_y ;
+  ll_y = ( !b_y[2] && !b_y[4] && !b_y[5] && q ) ? poly.v[3].x[1] :  ll_y ;
+
+  //Clamp BBox
+  ur_x = ( ur_x >> ( r_shift - ss_w_lg2 )) << ( r_shift - ss_w_lg2 ) ;
+  ur_y = ( ur_y >> ( r_shift - ss_w_lg2 )) << ( r_shift - ss_w_lg2 ) ;
+  ll_x = ( ll_x >> ( r_shift - ss_w_lg2 )) << ( r_shift - ss_w_lg2 ) ;
+  ll_y = ( ll_y >> ( r_shift - ss_w_lg2 )) << ( r_shift - ss_w_lg2 ) ;
+
+  ur_x = ur_x > screen_w ? screen_w : ur_x ;
+  ur_y = ur_y > screen_h ? screen_h : ur_y ;
+
+  ll_x = ll_x < 0   ? 0   : ll_x ;
+  ll_y = ll_y < 0   ? 0   : ll_y ;
+
+  valid = 1 ;
+  valid = ur_x < 0 ? 0 : valid ;
+  valid = ur_y < 0 ? 0 : valid ;
+  valid = ll_x > screen_w ? 0 : valid ;
+  valid = ll_y > screen_h ? 0 : valid ;
 
   //
   //Copy Past C++ Bounding Box Function ****END****
@@ -280,22 +386,50 @@ int rastBBox_check( int   v0_x,      //uPoly
       //
       // note that bool,true, and false are not in c
       
-	  int result = 0;
-	// Vertex 0's x,y coords
-	  v0_x = poly.v[0].x[0] - s_x;
-	  v0_y = poly.v[0].x[1] - s_y;
-	// Vertex 1's x,y coords
-	  v1_x = poly.v[1].x[0] - s_x;
-	  v1_y = poly.v[1].x[1] - s_y;
-	// Vertex 2's x,y coords
-	  v2_x = poly.v[2].x[0] - s_x;
-	  v2_y = poly.v[2].x[1] - s_y;
-	 
-
-	  result = ( ((v0_x*v1_y - v1_x*v0_y) <= 0) &&
-		     ((v1_x*v2_y - v2_x*v1_y) <  0) &&
-		     ((v2_x*v0_y - v0_x*v2_y) <= 0)
-		   );
+      int dist0, dist1, dist2, dist3, dist4, dist5;
+      int  b0, b1, b2, b3, b4, b5;
+      int Tresult , Qresult , result;
+      
+      //Shift Vertices such that sample is origin
+      v0_x = poly.v[0].x[0] - s_x ;
+      v0_y = poly.v[0].x[1] - s_y ;
+      v1_x = poly.v[1].x[0] - s_x ;
+      v1_y = poly.v[1].x[1] - s_y ;
+      v2_x = poly.v[2].x[0] - s_x ;
+      v2_y = poly.v[2].x[1] - s_y ;
+      v3_x = poly.v[3].x[0] - s_x ;
+      v3_y = poly.v[3].x[1] - s_y ;
+      
+      //Distance from Edge
+      dist0 = v0_x * v1_y - v1_x * v0_y;  // 0-1 edge 
+      dist1 = v1_x * v2_y - v2_x * v1_y;  // 1-2 edge 
+      dist2 = v2_x * v3_y - v3_x * v2_y;  // 2-3 edge 
+      dist3 = v3_x * v0_y - v0_x * v3_y;  // 3-0 edge 
+      dist4 = v1_x * v3_y - v3_x * v1_y;  // 2-3 edge 
+      dist5 = v2_x * v0_y - v0_x * v2_y;  // 2-0 edge
+      
+      //Test if on Right Side of Edge
+      b0 = dist0 <= 0 ;
+      b1 = dist1 <  0 ;
+      b2 = dist2 <  0 ;
+      b3 = dist3 <= 0 ;
+      b4 = dist4 <  0 ;
+      b5 = dist5 <= 0 ;
+      
+      //Using a LUT
+      Tresult = 0;
+      Tresult |= ( b0  ? 1 : 0) << 0;
+      Tresult |= ( b1  ? 1 : 0) << 1;
+      Tresult |= ( b5  ? 1 : 0) << 2;
+      
+      Qresult = 0;
+      Qresult |= ( b0 ? 1 : 0) << 0;
+      Qresult |= ( b1 ? 1 : 0) << 1;
+      Qresult |= ( b2 ? 1 : 0) << 2;
+      Qresult |= ( b3 ? 1 : 0) << 3;
+      Qresult |= ( b4 ? 1 : 0) << 4;
+      
+      result =  q ? kQuadCullBackHits_fix[Qresult] : kTriCullBackHits_fix[Tresult]  ;
   
       //
       //Copy Past C++ Sample Test Function ****END****

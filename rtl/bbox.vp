@@ -181,7 +181,7 @@ module `mname()`
    logic signed [`$sig_fig`-1:0] 	rounded_box_R10S[1:0][1:0];
    // Step 3 Result: LL and UR X, Y Fixed Point Values after Clipping
    logic signed [`$sig_fig`-1:0] 	out_box_R10S[1:0][1:0];      // bounds for output
-   // Step 3 Result: valid if validPoly_R10H && BBox within screen
+   // Step 3 Result: valid if validPoly_R10H && BBox within screon
    logic 				outvalid_R10H;               // output is valid
    
    //////// DECLARE OTHER SIGNALS YOU NEED
@@ -305,10 +305,10 @@ module `mname()`
 
       //////// PLACE YOUR CODE HERE
       //////// ASSIGN "out_box_R10S" and "outvalid_R10H"    
-    outvalid_R10H = ~((rounded_box[0][0] > screen_RnnnnS[0]) |
-                        (rounded_box[0][1] > screen_RnnnnS[1]) |
-                            (rounded_box[1][0] < `$sig_fig`'b0) |
-                                (rounded_box[1][1] < `$sig_fig`'b0));
+    outvalid_R10H = ~((rounded_box_R10S[0][0] > screen_RnnnnS[0]) |
+                        (rounded_box_R10S[0][1] > screen_RnnnnS[1]) |
+                            (rounded_box_R10S[1][0] < `$sig_fig`'b0) |
+                                (rounded_box_R10S[1][1] < `$sig_fig`'b0));
 
     out_box_R10S[0][0] = rounded_box_R10S[0][0] < `$sig_fig`'b0 ? 
               `$sig_fig`'b0 : rounded_box_R10S[0][0];

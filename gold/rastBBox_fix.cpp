@@ -98,8 +98,8 @@ void rastBBox_bbox_fix( u_Poly< long , ushort >& poly ,
 
   /*
   /  Function: rastBBox_bbox_fix
-  /  Function Description: Determine a bounding box ll_x,ll_y,
-  /   ur_x,ur_y from the micropolygon poly.  Note that this is
+  /  Function Description: Determine a bounding bod ll_x,ll_y,
+  /   ur_x,ur_y fomr the micropolygon poly.  Note that this is
   /   a fixed point function.
   /
   /  Inputs: 
@@ -162,37 +162,72 @@ void rastBBox_bbox_fix( u_Poly< long , ushort >& poly ,
   
   ///// PLACE YOUR CODE HERE
 
-  uP_vertex<long, ushort> *v = poly.v;
-  ll_x = ur_x = v[0].x[0];
-  ll_y = ur_y = v[0].x[1];
+  bool q ; //is quad
+  bool b_x[6] ;
+  bool b_y[6] ;
 
-  #define MIN(_a, _b) ((_a) < (_b) ? (_a) : (_b))
-  #define MAX(_a, _b) ((_a) > (_b) ? (_a) : (_b))
-  for(int i=0; i < poly.vertices; ++i){
-    ur_x = MAX(v[i].x[0], ur_x);
-    ll_x = MIN(v[i].x[0], ll_x);
-    ur_y = MAX(v[i].x[1], ur_y);
-    ll_y = MIN(v[i].x[1], ll_y);
-  }
+  //Determine if Polygon is Quad
+  q = (poly.vertices == 4) ;
 
-  valid = !( ur_x < 0 || ur_y < 0 || ll_x > screen_w || ll_y > screen_h);
+  //assert( !q );
 
-#define FLOOR_SS(val) ((val >> ( r_shift - ss_w_lg2 )) << ( r_shift - ss_w_lg2 ))
-  ll_x = FLOOR_SS(MAX(ll_x, 0));
-  ll_y = FLOOR_SS(MAX(ll_y, 0));
-  ur_x = FLOOR_SS(MIN(ur_x, screen_w));
-  ur_y = FLOOR_SS(MIN(ur_y, screen_h));
+  //Calculate BBox
+  b_x[0] = poly.v[0].x[0] < poly.v[1].x[0];
+  b_x[1] = poly.v[0].x[0] < poly.v[2].x[0];
+  b_x[2] = poly.v[0].x[0] < poly.v[3].x[0];
+  b_x[3] = poly.v[1].x[0] < poly.v[2].x[0];
+  b_x[4] = poly.v[1].x[0] < poly.v[3].x[0];
+  b_x[5] = poly.v[2].x[0] < poly.v[3].x[0];
+ 
+  b_y[0] = poly.v[0].x[1] < poly.v[1].x[1];
+  b_y[1] = poly.v[0].x[1] < poly.v[2].x[1];
+  b_y[2] = poly.v[0].x[1] < poly.v[3].x[1];
+  b_y[3] = poly.v[1].x[1] < poly.v[2].x[1];
+  b_y[4] = poly.v[1].x[1] < poly.v[3].x[1];
+  b_y[5] = poly.v[2].x[1] < poly.v[3].x[1];
 
+  ur_x = 0 ;
+  ur_y = 0 ;
+  ll_x = 0 ;
+  ll_y = 0 ;
+ 
+  ur_x = ( !b_x[0] && !b_x[1] )                 ? poly.v[0].x[0] :  ur_x ;
+  ur_x = (  b_x[0] && !b_x[3] )                 ? poly.v[1].x[0] :  ur_x ;
+  ur_x = (  b_x[1] &&  b_x[3] )                 ? poly.v[2].x[0] :  ur_x ;
+  ur_x = (  b_x[2] &&  b_x[4] &&  b_x[5] && q ) ? poly.v[3].x[0] :  ur_x ;
 
+  ll_x = (  b_x[0] &&  b_x[1] )                 ? poly.v[0].x[0] :  ll_x ;
+  ll_x = ( !b_x[0] &&  b_x[3] )                 ? poly.v[1].x[0] :  ll_x ;
+  ll_x = ( !b_x[1] && !b_x[3] )                 ? poly.v[2].x[0] :  ll_x ;
+  ll_x = ( !b_x[2] && !b_x[4] && !b_x[5] && q ) ? poly.v[3].x[0] :  ll_x ;
 
+  ur_y = ( !b_y[0] && !b_y[1] )                 ? poly.v[0].x[1] :  ur_y ;
+  ur_y = (  b_y[0] && !b_y[3] )                 ? poly.v[1].x[1] :  ur_y ;
+  ur_y = (  b_y[1] &&  b_y[3] )                 ? poly.v[2].x[1] :  ur_y ;
+  ur_y = (  b_y[2] &&  b_y[4] &&  b_y[5] && q ) ? poly.v[3].x[1] :  ur_y ;
 
-//  ur_x >>= r_shift;
-//  ur_y >>= r_shift;
-//  ll_x >>= r_shift;
-//  ll_y >>= r_shift;
-  
-  
-  
+  ll_y = (  b_y[0] &&  b_y[1] )                 ? poly.v[0].x[1] :  ll_y ;
+  ll_y = ( !b_y[0] &&  b_y[3] )                 ? poly.v[1].x[1] :  ll_y ;
+  ll_y = ( !b_y[1] && !b_y[3] )                 ? poly.v[2].x[1] :  ll_y ;
+  ll_y = ( !b_y[2] && !b_y[4] && !b_y[5] && q ) ? poly.v[3].x[1] :  ll_y ;
+
+  //Clamp BBox
+  ur_x = ( ur_x >> ( r_shift - ss_w_lg2 )) << ( r_shift - ss_w_lg2 ) ;
+  ur_y = ( ur_y >> ( r_shift - ss_w_lg2 )) << ( r_shift - ss_w_lg2 ) ;
+  ll_x = ( ll_x >> ( r_shift - ss_w_lg2 )) << ( r_shift - ss_w_lg2 ) ;
+  ll_y = ( ll_y >> ( r_shift - ss_w_lg2 )) << ( r_shift - ss_w_lg2 ) ;
+
+  ur_x = ur_x > screen_w ? screen_w : ur_x ;
+  ur_y = ur_y > screen_h ? screen_h : ur_y ;
+
+  ll_x = ll_x < 0   ? 0   : ll_x ;
+  ll_y = ll_y < 0   ? 0   : ll_y ;
+
+  valid = true ;
+  valid = ur_x < 0 ? false : valid ;
+  valid = ur_y < 0 ? false : valid ;
+  valid = ll_x >= screen_w ? false : valid ;
+  valid = ll_y >= screen_h ? false : valid ;
 
   /////
   ///// Bounding Box Function Goes Here
@@ -240,23 +275,50 @@ int rastBBox_stest_fix( u_Poly< long , ushort >& poly,
 
   ///// PLACE YOUR CODE HERE
   
-// Vertex 0's x,y coords
-  long v0_x = poly.v[0].x[0] - s_x;
-  long v0_y = poly.v[0].x[1] - s_y;
-// Vertex 1's x,y coords
-  long v1_x = poly.v[1].x[0] - s_x;
-  long v1_y = poly.v[1].x[1] - s_y;
-// Vertex 2's x,y coords
-  long v2_x = poly.v[2].x[0] - s_x;
-  long v2_y = poly.v[2].x[1] - s_y;
- 
+  int v0_x, v0_y, v1_x, v1_y, v2_x, v2_y, v3_x, v3_y; //was long
+  int dist0, dist1, dist2, dist3, dist4, dist5; //was long
+  bool b0, b1, b2, b3, b4, b5;
+  bool q ;
+  int Tresult , Qresult;
 
-  result = ( ((v0_x*v1_y - v1_x*v0_y) <= 0) &&
-             ((v1_x*v2_y - v2_x*v1_y) <  0) &&
-             ((v2_x*v0_y - v0_x*v2_y) <= 0)
-           );
+  q = poly.vertices == 4 ; 
 
-    
+
+  //Shift Vertices such that sample is origin
+  v0_x = poly.v[0].x[0] - s_x ;
+  v0_y = poly.v[0].x[1] - s_y ;
+  v1_x = poly.v[1].x[0] - s_x ;
+  v1_y = poly.v[1].x[1] - s_y ;
+  v2_x = poly.v[2].x[0] - s_x ;
+  v2_y = poly.v[2].x[1] - s_y ;
+  v3_x = poly.v[3].x[0] - s_x ;
+  v3_y = poly.v[3].x[1] - s_y ;
+
+  //Distance from Edge
+  dist0 = v0_x * v1_y - v1_x * v0_y;  // 0-1 edge 
+  dist1 = v1_x * v2_y - v2_x * v1_y;  // 1-2 edge 
+  dist2 = v2_x * v3_y - v3_x * v2_y;  // 2-3 edge 
+  dist3 = v3_x * v0_y - v0_x * v3_y;  // 3-0 edge 
+  dist4 = v1_x * v3_y - v3_x * v1_y;  // 1-3 edge 
+  dist5 = v2_x * v0_y - v0_x * v2_y;  // 2-0 edge
+
+  //Test if on Right Side of Edge
+  b0 = dist0 <= 0.0 ;
+  b1 = dist1 <  0.0 ;
+  b2 = dist2 <  0.0 ;
+  b3 = dist3 <= 0.0 ;
+  b4 = dist4 <  0.0 ;
+  b5 = dist5 <= 0.0 ;
+
+  //printf( " %i %i %i %i %i %i \n " , b0 , b1 , b2 , b3 , b4 , b5 );
+
+  //Is inside
+  Tresult = ( b0 && b1 &&  b5 ) ? 1 : 0 ; //Inside 0,1,2
+
+  Qresult = ( b1 && b2 && !b4 ) ? 3 : 0 ; //Inside UNTESTED
+  Qresult = ( b0 && b3 &&  b4 ) ? 1 : Qresult ; //UNTESTED
+
+  result =  q ? Qresult : Tresult  ;
 
   /////
   ///// Sample Test Function Goes Here

@@ -157,7 +157,7 @@ module  `mname()`
     //; for( my $i = 0 ; $i < $verts ; $i++ ) {  
    always_comb begin
      // assign dist_lg_R16S
-    dist_lg_R16S[`$i`] = edge_R16S[`$i`][0][0]*edge_R16s[`$i`][1][1] - edge_R16S[`$i`][1][0]*edge_R16s[`$i`][0][1];
+    dist_lg_R16S[`$i`] = edge_R16S[`$i`][0][0]*edge_R16S[`$i`][1][1] - edge_R16S[`$i`][1][0]*edge_R16S[`$i`][0][1];
    end   
     //; }
 
