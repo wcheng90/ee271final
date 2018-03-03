@@ -270,17 +270,15 @@ module `mname()`
     // Start out with helper signals!!
     assign at_top_edge_R14H   = (sample_R14S[1] == box_R14S[1][1]);
     assign at_right_edge_R14H = (sample_R14S[0] == box_R14S[1][0]);
-    assign at_end_box_R14H    = (at_top_edge_R14H & at_end_box_R14H);
+    assign at_end_box_R14H    = (at_top_edge_R14H & at_right_edge_R14H);
 
     // Right sample!
-    assign next_rt_samp_R14S[0] = {sample_R14S[0][`$sig_fig`-1:`$radix`-3],
-                                        subSample_RnnnnU };
+    assign next_rt_samp_R14S[0] = sample_R14S[0] + subSample_RnnnnU;
     assign next_rt_samp_R14S[1] = sample_R14S[1];
 
     // Up sample!
     assign next_up_samp_R14S[0] = box_R14S[0][0];
-    assign next_up_samp_R14S[1] = {sample_R14S[1][`$sig_fig`-1:`$radix`-3],
-                                        subSample_RnnnnU};
+    assign next_up_samp_R14S[1] = sample_R14S[1] + subSample_RnnnnU;
 
 
    //////
@@ -292,24 +290,6 @@ module `mname()`
 
     always_comb begin
     unique case( state_R14H )
-        ( WAIT_STATE ): begin
-            // pass through
-            next_sample_R14S    = box_R13S[0];
-            // pass through
-            next_validSamp_R14H = validPoly_R13H;
-            // pass through
-            next_isQuad_R14H    = isQuad_R13H;
-            // if valid, go to TEST_STATE. Else, stall
-            next_state_R14H     = validPoly_R13H ? TEST_STATE : WAIT_STATE;
-            // pass through
-            next_poly_R14S      = poly_R13S;
-            // pass through
-            next_color_R14U     = color_R13U;
-            // pass through
-            next_box_R14S       = box_R13S;
-            // if invalid, stall!
-            next_halt_RnnnnL    = ~validPoly_R13H;
-        end
         ( TEST_STATE ): begin
             // if at right edge, go up!
             next_sample_R14S    = at_right_edge_R14H ? next_up_samp_R14S : next_rt_samp_R14S;
@@ -325,8 +305,27 @@ module `mname()`
             next_color_R14U     = color_R14U;
             // pass through
             next_box_R14S       = box_R14S;
-            // halt when at end
-            next_halt_RnnnnL    = at_end_box_R14H;
+            // halt when we're still parsing current box
+            next_halt_RnnnnL    = ~at_end_box_R14H;
+        end
+        //( WAIT_STATE ): begin
+        default : begin
+            // pass through
+            next_sample_R14S    = box_R13S[0];
+            // pass through
+            next_validSamp_R14H = validPoly_R13H;
+            // pass through
+            next_isQuad_R14H    = isQuad_R13H;
+            // if valid, go to TEST_STATE. Else, stall
+            next_state_R14H     = validPoly_R13H ? TEST_STATE : WAIT_STATE;
+            // pass through
+            next_poly_R14S      = poly_R13S;
+            // pass through
+            next_color_R14U     = color_R13U;
+            // pass through
+            next_box_R14S       = box_R13S;
+            // if incoming valid box, halt!
+            next_halt_RnnnnL    = validPoly_R13H;
         end
         endcase // case ( state_R14H )
 
