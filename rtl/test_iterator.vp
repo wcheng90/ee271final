@@ -313,7 +313,7 @@ module `mname()`
             // pass through
             next_box_R14S       = box_R14S;
             // halt when we're still parsing current box
-            next_halt_RnnnnL    = ~at_end_box_R14H;
+            next_halt_RnnnnL    = at_end_box_R14H;
         end
         //( WAIT_STATE ): begin
         default : begin
@@ -332,7 +332,7 @@ module `mname()`
             // pass through
             next_box_R14S       = box_R13S;
             // if incoming valid box, halt!
-            next_halt_RnnnnL    = validPoly_R13H;
+            next_halt_RnnnnL    = ~validPoly_R13H;
         end
         endcase // case ( state_R14H )
 
