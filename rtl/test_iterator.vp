@@ -233,6 +233,7 @@ module `mname()`
 			   .out(box_R14S));
    
    
+/*
    //; my $d306 = generate( 'dff', "d306", 
    //;                        BitWidth=>1,
    //;                        PipelineDepth=>1,
@@ -241,6 +242,12 @@ module `mname()`
 			   .in(next_state_R14H) ,
 			   .clk(clk) , .reset(rst), .en(1'b1),
 			   .out(state_R14H));
+   */
+   always_ff @(posedge clk) begin
+      if(rst) state_R14H = WAIT_STATE;
+      else    state_R14H = next_state_R14H;
+   end
+
 
 
    // define some helper signals
