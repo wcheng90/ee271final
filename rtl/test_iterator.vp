@@ -275,9 +275,9 @@ module `mname()`
 // ******************************************************************
 
     // Start out with helper signals!!
-    assign at_top_edge_R14H   = (sample_R14S[1] == box_R14S[1][1]);
-    assign at_right_edge_R14H = (sample_R14S[0] == box_R14S[1][0]);
-    assign at_end_box_R14H    = (at_top_edge_R14H & at_right_edge_R14H);
+    assign at_top_edg_R14H   = (sample_R14S[1] == box_R14S[1][1]);
+    assign at_right_edg_R14H = (sample_R14S[0] == box_R14S[1][0]);
+    assign at_end_box_R14H    = (at_top_edg_R14H & at_right_edg_R14H);
 
     // Right sample!
     assign next_rt_samp_R14S[0] = sample_R14S[0] + subSample_RnnnnU;
@@ -299,7 +299,7 @@ module `mname()`
     unique case( state_R14H )
         ( TEST_STATE ): begin
             // if at right edge, go up!
-            next_sample_R14S    = at_right_edge_R14H ? next_up_samp_R14S : next_rt_samp_R14S;
+            next_sample_R14S    = at_right_edg_R14H ? next_up_samp_R14S : next_rt_samp_R14S;
             // if we're not at the end, we have more to go
             next_validSamp_R14H = ~at_end_box_R14H;
             // pass through

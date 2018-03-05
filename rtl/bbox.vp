@@ -202,7 +202,7 @@ module `mname()`
    //; # if( $verts == 4 ) {
    /* OLD QUAD CODE Used to be here */
    //; # }
-   
+
    /* Note to the bold!!! */
    /* You can actually process more than
     * 3 vertices if you really want.
@@ -215,16 +215,22 @@ module `mname()`
 
    //; if( $verts == 3 ) {
 
-   logic signed [`$sig_fig`-1:0] llx1 = (poly_R10S[0][0] < poly_R10S[1][0]) ? poly_R10S[0][0] : poly_R10S[1][0];
-   logic signed [`$sig_fig`-1:0] lly1 = (poly_R10S[0][1] < poly_R10S[1][1]) ? poly_R10S[0][1] : poly_R10S[1][1];
-   logic signed [`$sig_fig`-1:0] urx1 = poly_R10S[0][0] > poly_R10S[1][0] ? poly_R10S[0][0] : poly_R10S[1][0];
-   logic signed [`$sig_fig`-1:0] ury1 = poly_R10S[0][1] > poly_R10S[1][1] ? poly_R10S[0][1] : poly_R10S[1][1];
+   logic signed [`$sig_fig`-1:0] llx1;
+   logic signed [`$sig_fig`-1:0] lly1;
+   logic signed [`$sig_fig`-1:0] urx1;
+   logic signed [`$sig_fig`-1:0] ury1;
+
+   assign llx1 = (poly_R10S[0][0] < poly_R10S[1][0]) ? poly_R10S[0][0] : poly_R10S[1][0];
+   assign lly1 = (poly_R10S[0][1] < poly_R10S[1][1]) ? poly_R10S[0][1] : poly_R10S[1][1];
+   assign urx1 = poly_R10S[0][0] > poly_R10S[1][0] ? poly_R10S[0][0] : poly_R10S[1][0];
+   assign ury1 = poly_R10S[0][1] > poly_R10S[1][1] ? poly_R10S[0][1] : poly_R10S[1][1];
+
    always_comb begin
    // box_R10S[0][0]: LL X
    // box_R10S[0][1]: LL Y <-- inferred
    // box_R10S[1][0]: UR X
    // box_R10S[1][1]: UR Y
-   
+
    // LL X set
       box_R10S[0][0] = llx1 < poly_R10S[2][0] ? llx1 : poly_R10S[2][0];
    // LL Y set
@@ -273,12 +279,10 @@ module `mname()`
    //; for( my $i = 0 ; $i < 2 ; $i++ ) {
    //; 	for( my $j = 0 ; $j < 2 ; $j++ ) {
 
-      //Integer Portion of LL and UR Remains the Same 
-      rounded_box_R10S[`$i`][`$j`][`$sig_fig`-1:`$radix`] 
-     = box_R10S[`$i`][`$j`][`$sig_fig`-1:`$radix`];
+      //Integer Portion of LL and UR Remains the Same
+      rounded_box_R10S[`$i`][`$j`][`$sig_fig`-1:`$radix`] = box_R10S[`$i`][`$j`][`$sig_fig`-1:`$radix`];
 
-      rounded_box_R10S[`$i`][`$j`][`$radix`-1:0]  
-     = box_R10S[`$i`][`$j`][`$radix`-1:0] & mask;
+      rounded_box_R10S[`$i`][`$j`][`$radix`-1:0] = box_R10S[`$i`][`$j`][`$radix`-1:0] & mask;
 
 
       //////// PLACE YOUR CODE HERE
