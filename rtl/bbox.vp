@@ -308,10 +308,11 @@ module `mname()`
 
       //////// PLACE YOUR CODE HERE
       //////// ASSIGN "out_box_R10S" and "outvalid_R10H"    
-    outvalid_R10H = ~((rounded_box_R10S[0][0] > screen_RnnnnS[0]) |
-                        (rounded_box_R10S[0][1] > screen_RnnnnS[1]) |
-                            (rounded_box_R10S[1][0] < `$sig_fig`'b0) |
-                                (rounded_box_R10S[1][1] < `$sig_fig`'b0));
+    outvalid_R10H = validPoly_R10H &
+                    ~((rounded_box_R10S[0][0] > screen_RnnnnS[0]) |
+                      (rounded_box_R10S[0][1] > screen_RnnnnS[1]) |
+                      (rounded_box_R10S[1][0] < `$sig_fig`'b0) |
+                      (rounded_box_R10S[1][1] < `$sig_fig`'b0));
 
     out_box_R10S[0][0] = rounded_box_R10S[0][0] < `$sig_fig`'b0 ? 
               `$sig_fig`'b0 : rounded_box_R10S[0][0];
