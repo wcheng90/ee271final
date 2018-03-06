@@ -273,9 +273,17 @@ module `mname()`
 
 
    logic[`$radix`-1:0] mask;
+   logic[`$radix`-1:0] ss_w_lg2;
    //Round LowerLeft and UpperRight for X and Y
    always_comb begin
-      mask = ~((1<<(`$radix`-subSample_RnnnnU)) -1);
+      case(subSample_RnnnnU)
+         4'b0001 : ss_w_lg2 = `$radix`'h3;
+         4'b0010 : ss_w_lg2 = `$radix`'h2;
+         4'b0100 : ss_w_lg2 = `$radix`'h1;
+         4'b1000 : ss_w_lg2 = `$radix`'h0;
+      endcase
+
+      mask = ~((1<<(`$radix`-ss_w_lg2)) -1);
    //; for( my $i = 0 ; $i < 2 ; $i++ ) {
    //; 	for( my $j = 0 ; $j < 2 ; $j++ ) {
 

@@ -708,32 +708,32 @@ int rastBBox_jhash_jit_fix_check(
 
   if( (s_x & jitter_x) != 0 ){
     valid = 0 ;
-    printf( "Jitter Inappropriately Large X %d %d\n" , s_x , jitter_x );
+    printf( "Jitter Inappropriately Large X %d %d. Gold jitter = %d\n" , s_x , jitter_x, gold_jitter_x );
   }
 
   if( (s_y & jitter_y) != 0 ){
     valid = 0 ;
-    printf( "Jitter Inappropriately Large Y %d %d\n" , s_y , jitter_y );
+    printf( "Jitter Inappropriately Large Y %d %d. Gold jitter = %d\n" , s_y , jitter_y, gold_jitter_y );
   }
 
   if( gold_jitter_x != jitter_x ){
     valid = 0 ;
-    printf( " Mismatch on j_x Gold: %d Bench: %d\n" , gold_jitter_x , jitter_x );
+    printf( " Mismatch on j_x Gold: %d Bench: %d [jitter different]\n" , gold_jitter_x , jitter_x );
   }
 
   if( gold_jitter_y != jitter_y ){
     valid = 0 ;
-    printf( " Mismatch on j_y Gold: %d Bench: %d\n" , gold_jitter_y , jitter_y );
+    printf( " Mismatch on j_y Gold: %d Bench: %d [jitter different]\n" , gold_jitter_y , jitter_y );
   }
 
   if( gold_s_j_x != s_j_x ){
     valid = 0 ;
-    printf( " Mismatch on j_x Gold: %ld Bench: %d\n" , gold_s_j_x , s_j_x );
+    printf( " Mismatch on j_x Gold: %ld Bench: %d [s_j_x different]\n" , gold_s_j_x , s_j_x );
   }
 
   if( gold_s_j_y != s_j_y ){
     valid = 0 ;
-    printf( " Mismatch on j_y Gold: %ld Bench: %d\n" , gold_s_j_y , s_j_y );
+    printf( " Mismatch on j_y Gold: %ld Bench: %d [s_j_x different]\n" , gold_s_j_y , s_j_y );
   }
 
   return valid ;
