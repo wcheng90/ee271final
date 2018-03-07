@@ -273,6 +273,20 @@ module `mname()`
 // ******************************************************************
 // ******************************************************************
 // ******************************************************************
+ 
+
+   logic[`$radix`-1:0] ss_w_lg2;
+   always_comb begin
+      case(subSample_RnnnnU)
+         4'b0001 : ss_w_lg2 = `$radix`'h3;
+         4'b0010 : ss_w_lg2 = `$radix`'h2;
+         4'b0100 : ss_w_lg2 = `$radix`'h1;
+         4'b1000 : ss_w_lg2 = `$radix`'h0;
+      endcase
+   end
+   logic [`$radix+1`-1:0] incr;
+   assign incr = (`$radix+1`'h1 << `$radix+1`'d`$radix`) >> ss_w_lg2;
+
 
     // Start out with helper signals!!
     assign at_top_edg_R14H   = (sample_R14S[1] == box_R14S[1][1]);
@@ -280,13 +294,12 @@ module `mname()`
     assign at_end_box_R14H    = (at_top_edg_R14H & at_right_edg_R14H);
 
     // Right sample!
-    assign next_rt_samp_R14S[0] = sample_R14S[0] + subSample_RnnnnU;
+    assign next_rt_samp_R14S[0] = sample_R14S[0] + incr;
     assign next_rt_samp_R14S[1] = sample_R14S[1];
 
     // Up sample!
     assign next_up_samp_R14S[0] = box_R14S[0][0];
-    assign next_up_samp_R14S[1] = sample_R14S[1] + subSample_RnnnnU;
-
+    assign next_up_samp_R14S[1] = sample_R14S[1] + incr;//subSample_RnnnnU;
 
    //////
    ////// Then complete the following combinational logic defining the
