@@ -275,13 +275,14 @@ module `mname()`
 // ******************************************************************
  
 
-   logic[`$radix`-1:0] ss_w_lg2;
+   logic[1:0] ss_w_lg2;
    always_comb begin
       case(subSample_RnnnnU)
-         4'b0001 : ss_w_lg2 = `$radix`'h3;
-         4'b0010 : ss_w_lg2 = `$radix`'h2;
-         4'b0100 : ss_w_lg2 = `$radix`'h1;
-         4'b1000 : ss_w_lg2 = `$radix`'h0;
+         4'b0001 : ss_w_lg2 = 2'h3;
+         4'b0010 : ss_w_lg2 = 2'h2;
+         4'b0100 : ss_w_lg2 = 2'h1;
+         4'b1000 : ss_w_lg2 = 2'h0;
+         default : ss_w_lg2 = 2'h0;
       endcase
    end
    logic [`$radix+1`-1:0] incr;
