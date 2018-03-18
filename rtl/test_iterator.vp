@@ -291,18 +291,12 @@ module `mname()`
     logic go_next_row;
     logic valid_col;
     logic hit_valid;
-    logic go_next_row2;
 
-    always_ff @(posedge clk) begin
-        valid_col = (valid_col | hit_valid) & !(go_next_row);
-        go_next_row2 = (valid_col & !hit_valid) | at_right_edg_R14H;
-    end
-    always_ff @(posedge clk) begin
-        go_next_row = go_next_row2;
-    end
+    assign valid_col = (valid_col | hit_valid) & !(go_next_row);
+    assign go_next_row = (valid_col & !hit_valid) | at_right_edg_R14H;
 
     // Start out with helper signals!!
-    assign at_top_edg_R14H   = (sample_R14S[1] == box_R14S[1][1]);
+    assign at_top_edg_R14H   = (sample_R14S[1]/*-(incr<<1)*/) == box_R14S[1][1];
     assign at_right_edg_R14H = (sample_R14S[0] == box_R14S[1][0]);
 //    assign at_end_box_R14H    = (at_top_edg_R14H & at_right_edg_R14H);
     assign at_end_box_R14H    = (at_top_edg_R14H & go_next_row);
@@ -378,7 +372,7 @@ module `mname()`
    always_comb begin  // Maybe we can check just the upper bit to see if its negative or not just to be fancy
                         // Also does this need to match our conditionals in gold_test
      // assign hit_valid_R16H
-    hit_valid = (0 >= dist_lg_R16S[0]) & (0 > dist_lg_R16S[1]) & (0 >= dist_lg_R16S[2]);
+    hit_valid = (0 >= dist_lg_R16S[0]) & (0 >= dist_lg_R16S[1]) & (0 >= dist_lg_R16S[2]);
    end   
 
 
