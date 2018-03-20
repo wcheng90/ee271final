@@ -293,18 +293,24 @@ module `mname()`
     logic at_left_edg_R14H;
     logic go_next_row;
     logic last_valid;
+    logic last_valid2;
+    logic last_valid3;
 
     assign at_left_edg_R14H = sample_R14S[0] == box_R14S[0][0];
 
     always_ff @(posedge clk) begin
         if(at_right_edg_R14H) begin //@TODO try at_left_edg??
-            last_valid = 1'b0;
-         end else begin
-            last_valid = hit_valid;
+            last_valid <= 1'b0;
+            last_valid2 <= 1'b0;
+            last_valid3 <= 1'b0;
+        end else begin
+            last_valid <= hit_valid;
+            last_valid2 <= last_valid;
+            last_valid3 <= last_valid2;
         end
     end
 
-    assign go_next_row = (last_valid & !hit_valid) | at_right_edg_R14H;
+    assign go_next_row = (last_valid3 & !last_valid2) | at_right_edg_R14H;
 
     // Start out with helper signals!!
     assign at_top_edg_R14H   = (sample_R14S[1] == box_R14S[1][1]);
