@@ -289,26 +289,26 @@ module `mname()`
     logic [`$radix+1`-1:0] incr;
     assign incr = (`$radix+1`'h1 << `$radix+1`'d`$radix`) >> ss_w_lg2;
 
-    logic go_next_row;
-    logic valid_col;
     logic hit_valid;
+    logic at_left_edg_R14H;
+    logic go_next_row;
     logic last_valid;
-    always_ff @(posedge clk) last_valid = !go_next_row & valid_col;
-/*    always_ff @(posedge clk) begin
-        if(go_next_row) begin
+
+    assign at_left_edg_R14H = sample_R14S[0] == box_R14S[0][0];
+
+    always_ff @(posedge clk) begin
+        if(at_right_edg_R14H) begin //@TODO try at_left_edg??
             last_valid = 1'b0;
-        end else begin
-            last_valid <= valid_col;
+         end else begin
+            last_valid = hit_valid;
         end
     end
-*/
-    assign valid_col = (valid_col | hit_valid) & !(go_next_row);
-    //assign go_next_row = (valid_col & !hit_valid) | at_right_edg_R14H;
-    assign go_next_row = (last_valid & !hit_valid ) | at_right_edg_R14H;
+
+    assign go_next_row = (last_valid & !hit_valid) | at_right_edg_R14H;
 
     // Start out with helper signals!!
     assign at_top_edg_R14H   = (sample_R14S[1] == box_R14S[1][1]);
-    assign at_right_edg_R14H = ((sample_R14S[0]-(incr<<1)) == box_R14S[1][0]);
+    assign at_right_edg_R14H = ((sample_R14S[0]/*-(incr)*/) == box_R14S[1][0]);
     assign at_end_box_R14H    = (at_top_edg_R14H & go_next_row);
 
     // Right sample!
@@ -448,10 +448,10 @@ module `mname()`
 
    //Check that Proposed Sample is in BBox
 // Levi commenting these out cuz we jank'd them out with some ... questionable ... logic
-//   assert property( rb_lt( rst, next_sample_R14S[0] , next_box_R14S[1][0] , next_validSamp_R14H ));
-//   assert property( rb_lt( rst, next_sample_R14S[1] , next_box_R14S[1][1] , next_validSamp_R14H ));
-//   assert property( rb_lt( rst, next_box_R14S[0][0] , next_sample_R14S[0] , next_validSamp_R14H ));
-//   assert property( rb_lt( rst, next_box_R14S[0][1] , next_sample_R14S[1] , next_validSamp_R14H ));
+   assert property( rb_lt( rst, next_sample_R14S[0] , next_box_R14S[1][0] , next_validSamp_R14H ));
+   assert property( rb_lt( rst, next_sample_R14S[1] , next_box_R14S[1][1] , next_validSamp_R14H ));
+   assert property( rb_lt( rst, next_box_R14S[0][0] , next_sample_R14S[0] , next_validSamp_R14H ));
+   assert property( rb_lt( rst, next_box_R14S[0][1] , next_sample_R14S[1] , next_validSamp_R14H ));
    //Check that Proposed Sample is in BBox
 
    //Error Checking Assertions
