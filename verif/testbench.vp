@@ -158,9 +158,9 @@ module `mname()`
       .color_R18U(color_R18U),         //Color of Sample Hit
       .hit_valid_R18H(hit_valid_R18H),  //Is sample hit valid
 
-      .hit_R18S(hit_R18S_2),             //Sample Location and depth
-      .color_R18U(color_R18U_2),         //Color of Sample Hit
-      .hit_valid_R18H(hit_valid_R18H_2)  //Is sample hit valid
+      .hit_R18S_2(hit_R18S_2),             //Sample Location and depth
+      .color_R18U_2(color_R18U_2),         //Color of Sample Hit
+      .hit_valid_R18H_2(hit_valid_R18H_2)  //Is sample hit valid
       
       );
 
