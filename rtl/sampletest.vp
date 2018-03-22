@@ -167,7 +167,11 @@ module  `mname()`
    always_comb begin  // Maybe we can check just the upper bit to see if its negative or not just to be fancy
                         // Also does this need to match our conditionals in gold_test
      // assign hit_valid_R16H
-    hit_valid_R16H = (0 >= dist_lg_R16S[0]) & (0 > dist_lg_R16S[1]) & (0 >= dist_lg_R16S[2]);
+//    hit_valid_R16H = (0 >= dist_lg_R16S[0]) & (0 > dist_lg_R16S[1]) & (0 >= dist_lg_R16S[2]);
+    hit_valid_R16H = (dist_lg_R16S[0][47] | !(|dist_lg_R16S[0][46:0])) &
+                     (dist_lg_R16S[1][47]                           ) &
+                     (dist_lg_R16S[2][47] | !(|dist_lg_R16S[2][46:0]));
+                     
    end   
 
    //////// END YOUR IMPLEMENTATION
