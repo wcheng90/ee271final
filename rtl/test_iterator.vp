@@ -137,7 +137,14 @@ module `mname()`
    output logic unsigned [`$sig_fig`-1:0] color_R14U[`$colors`-1:0] , //Color of Poly
    output logic signed [`$sig_fig`-1:0] sample_R14S[1:0], //Sample Location to Be Tested
    output logic 			isQuad_R14H, //Micropygon is quad
-   output logic 			validSamp_R14H                   //Sample and Micropolygon are Valid
+   output logic 			validSamp_R14H,                   //Sample and Micropolygon are Valid
+
+//   output logic signed [`$sig_fig`-1:0] poly_R14S_2[`$verts`-1:0][`$axis`-1:0], //Micropolygon to Sample Test
+//   output logic unsigned [`$sig_fig`-1:0] color_R14U_2[`$colors`-1:0] , //Color of Poly
+   output logic signed [`$sig_fig`-1:0] sample_R14S_2[1:0], //Sample Location to Be Tested
+//   output logic 			isQuad_R14H_2, //Micropygon is quad
+   output logic 			validSamp_R14H_2                   //Sample and Micropolygon are Valid
+
    );
 
 
@@ -293,16 +300,20 @@ module `mname()`
 
     // Start out with helper signals!!
     assign at_top_edg_R14H   = (sample_R14S[1] == box_R14S[1][1]);
-    assign at_right_edg_R14H = ((sample_R14S[0]/*-(incr)*/) == box_R14S[1][0]);
+    assign at_right_edg_R14H = (sample_R14S[0] == box_R14S[1][0]) | (sample_R14S_2[0] == box_R14S[1][0]);
     assign at_end_box_R14H    = (at_top_edg_R14H & at_right_edg_R14H);
 
     // Right sample!
-    assign next_rt_samp_R14S[0] = sample_R14S[0] + incr;
+    assign next_rt_samp_R14S[0] = sample_R14S[0] + (incr << 1);
     assign next_rt_samp_R14S[1] = sample_R14S[1];
 
     // Up sample!
     assign next_up_samp_R14S[0] = box_R14S[0][0];
     assign next_up_samp_R14S[1] = sample_R14S[1] + incr;//subSample_RnnnnU;
+
+    assign sample_R14S_2[0] = sample_R14S[0] + incr;
+    assign sample_R14S_2[1] = sample_R14S[1];
+    assign validSamp_R14H_2 = validSamp_R14H;
 
    //////
    ////// Then complete the following combinational logic defining the
@@ -317,7 +328,6 @@ module `mname()`
     logic signed [`$sig_fig`-1:0] 	 poly_shift_R16S[`$verts`-1:0][1:0]; // Micropolygon after coordinate shift
     logic signed [`$sig_fig`-1:0] 	 edge_R16S[3-1:0][1:0][1:0]; // Edges
     logic signed [2*`$sig_fig`-1:0] 	 dist_lg_R16S[3-1:0]; // Result of x_1 * y_2 - x_2 * y_1
-    logic signed [`$sig_fig`-1:0] 	 hit_R16S[`$axis`-1:0]; // Sample position
 
 
     //; for( my $i = 0 ; $i < $verts ; $i++ ) {
