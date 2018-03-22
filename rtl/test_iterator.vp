@@ -288,6 +288,7 @@ module `mname()`
 
     logic [`$radix+1`-1:0] incr;
     assign incr = (`$radix+1`'h1 << `$radix+1`'d`$radix`) >> ss_w_lg2;
+
     logic hit_back_valid;
 
     // Start out with helper signals!!
@@ -315,14 +316,16 @@ module `mname()`
     // Signals in Access Order
     logic signed [`$sig_fig`-1:0] 	 poly_shift_R16S[`$verts`-1:0][1:0]; // Micropolygon after coordinate shift
     logic signed [`$sig_fig`-1:0] 	 edge_R16S[3-1:0][1:0][1:0]; // Edges
-    logic signed [47:0] 	 dist_lg_R16S[3-1:0]; // Result of x_1 * y_2 - x_2 * y_1
+    logic signed [2*`$sig_fig`-1:0] 	 dist_lg_R16S[3-1:0]; // Result of x_1 * y_2 - x_2 * y_1
+    logic signed [`$sig_fig`-1:0] 	 hit_R16S[`$axis`-1:0]; // Sample position
+
 
     //; for( my $i = 0 ; $i < $verts ; $i++ ) {
     //;     for( my $j = 0 ; $j < 2 ; $j++ ) {
     always_comb begin
         // (1) Shift X, Y coordinates such that the fragment resides on the (0,0) position.
-        poly_shift_R16S[`$i`][`$j`] = poly_R14S[`$i`][`$j`] - sample_R14S[`$j`][11:0];
-     end
+        poly_shift_R16S[`$i`][`$j`] = poly_R14S[`$i`][`$j`] - sample_R14S[`$j`];
+    end
     //;     }
     //; }
 
@@ -333,7 +336,7 @@ module `mname()`
         // (2) Organize edges (form three edges for triangles)
         edge_R16S[`$i`][0][`$k`] = poly_shift_R16S[`$i`][`$k`];
         edge_R16S[`$i`][1][`$k`] = poly_shift_R16S[`($i+1)%3`][`$k`];
-     end
+    end
     //;     }
     //; }
 
@@ -341,7 +344,7 @@ module `mname()`
     //; for( my $i = 0 ; $i < $verts ; $i++ ) {
     always_comb begin
         //(3) Calculate distance x_1 * y_2 - x_2 * y_1
-        dist_lg_R16S[`$i`] = edge_R16S[`$i`][0][0][11:0]*edge_R16S[`$i`][1][1][11:0] - edge_R16S[`$i`][1][0][11:0]*edge_R16S[`$i`][0][1][11:0];
+        dist_lg_R16S[`$i`] = edge_R16S[`$i`][0][0]*edge_R16S[`$i`][1][1] - edge_R16S[`$i`][1][0]*edge_R16S[`$i`][0][1];
     end
     //; }
 
@@ -353,6 +356,7 @@ module `mname()`
         hit_back_valid = (!dist_lg_R16S[0][47] & (|dist_lg_R16S[0][46:0])) & // dist[0] > 0
                          (!dist_lg_R16S[1][47]                           ) & // dist[1] >= 0
                          (!dist_lg_R16S[2][47] & (|dist_lg_R16S[2][46:0]));  // dist[2] > 0
+
     end
 
 
